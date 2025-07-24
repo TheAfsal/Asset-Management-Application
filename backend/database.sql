@@ -1,0 +1,82 @@
+CREATE DATABASE asset_management;
+USE asset_management;
+
+CREATE TABLE asset_categories (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  description TEXT,
+  status ENUM('active', 'inactive') DEFAULT 'active',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE asset_subcategories (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  category_id INT NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  description TEXT,
+  status ENUM('active', 'inactive') DEFAULT 'active',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (category_id) REFERENCES asset_categories(id)
+);
+
+CREATE TABLE branches (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  location VARCHAR(255),
+  code VARCHAR(10) UNIQUE NOT NULL,
+  status ENUM('active', 'inactive') DEFAULT 'active',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE vendors (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  contact_person VARCHAR(100),
+  email VARCHAR(100),
+  phone VARCHAR(20),
+  address TEXT,
+  gst_number VARCHAR(50),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE manufacturers (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  description TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE grn_headers (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  grn_number VARCHAR(20) UNIQUE NOT NULL,
+  grn_date DATE NOT NULL,
+  invoice_number VARCHAR(30) NOT NULL,
+  vendor_id INT NOT NULL,
+  branch_id INT NOT NULL,
+  status ENUM('draft', 'submitted') DEFAULT 'draft',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (vendor_id) REFERENCES vendors(id),
+  FOREIGN KEY (branch_id) REFERENCES branches(id)
+);
+
+CREATE TABLE grn_line_items (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  grn_id INT NOT NULL,
+  subcategory_id INT NOT NULL,
+  item_description VARCHAR(100) NOT NULL,
+  quantity INT NOT NULL,
+  unit_price DECIMAL(10, 2) NOT NULL,
+  tax_percent DECIMAL(5, 2) NOT NULL,
+  taxable_value DECIMAL(10, 2) NOT NULL,
+  total_amount DECIMAL(10, 2) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (grn_id) REFERENCES grn_headers(id),
+  FOREIGN KEY (subcategory_id) REFERENCES asset_subcategories(id)
+);

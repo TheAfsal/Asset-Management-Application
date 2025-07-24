@@ -1,0 +1,167 @@
+openapi: 3.0.3
+info:
+  title: Asset Management API
+  version: 1.0.0
+paths:
+  /api/v1/grns:
+    post:
+      summary: Create a new GRN
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGrnDto'
+      responses:
+        '201':
+          description: GRN created
+    get:
+      summary: List all GRNs
+      responses:
+        '200':
+          description: List of GRNs
+  /api/v1/vendors:
+    post:
+      summary: Create a new vendor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VendorDto'
+      responses:
+        '201':
+          description: Vendor created
+    get:
+      summary: List all vendors
+      responses:
+        '200':
+          description: List of vendors
+  /api/v1/branches:
+    post:
+      summary: Create a new branch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BranchDto'
+      responses:
+        '201':
+          description: Branch created
+    get:
+      summary: List all branches
+      responses:
+        '200':
+          description: List of branches
+  /api/v1/asset-categories:
+    post:
+      summary: Create a new asset category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssetCategoryDto'
+      responses:
+        '201':
+          description: Asset category created
+    get:
+      summary: List all asset categories
+      responses:
+        '200':
+          description: List of asset categories
+  /api/v1/asset-subcategories:
+    post:
+      summary: Create a new asset subcategory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssetSubcategoryDto'
+      responses:
+        '201':
+          description: Asset subcategory created
+    get:
+      summary: List all asset subcategories
+      responses:
+        '200':
+          description: List of asset subcategories
+  /api/v1/manufacturers:
+    post:
+      summary: Create a new manufacturer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManufacturerDto'
+      responses:
+        '201':
+          description: Manufacturer created
+    get:
+      summary: List all manufacturers
+      responses:
+        '200':
+          description: List of manufacturers
+components:
+  schemas:
+    CreateGrnDto:
+      type: object
+      properties:
+        header:
+          type: object
+          properties:
+            grn_number: { type: string }
+            grn_date: { type: string }
+            invoice_number: { type: string }
+            vendor_id: { type: integer }
+            branch_id: { type: integer }
+            status: { type: string, enum: ['draft', 'submitted'] }
+        lineItems:
+          type: array
+          items:
+            type: object
+            properties:
+              subcategory_id: { type: integer }
+              item_description: { type: string }
+              quantity: { type: integer }
+              unit_price: { type: number }
+              tax_percent: { type: number }
+              taxable_value: { type: number }
+              total_amount: { type: number }
+    VendorDto:
+      type: object
+      properties:
+        name: { type: string }
+        contact_person: { type: string }
+        email: { type: string }
+        phone: { type: string }
+        address: { type: string }
+        gst_number: { type: string }
+    BranchDto:
+      type: object
+      properties:
+        name: { type: string }
+        location: { type: string }
+        code: { type: string }
+        status: { type: string, enum: ['active', 'inactive'] }
+    AssetCategoryDto:
+      type: object
+      properties:
+        name: { type: string }
+        description: { type: string }
+        status: { type: string, enum: ['active', 'inactive'] }
+    AssetSubcategoryDto:
+      type: object
+      properties:
+        category_id: { type: integer }
+        name: { type: string }
+        description: { type: string }
+        status: { type: string, enum: ['active', 'inactive'] }
+    ManufacturerDto:
+      type: object
+      properties:
+        name: { type: string }
+        description: { type: string }
