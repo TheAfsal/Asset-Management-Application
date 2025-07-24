@@ -2,7 +2,8 @@ import express from "express";
 import swaggerUi from "swagger-ui-express";
 import yaml from "js-yaml";
 import path from "path";
-import fs from 'fs';
+import fs from "fs";
+import cors from "cors";
 import grnRoutes from "./infrastructure/routes/grn.routes";
 import vendorRoutes from "./infrastructure/routes/vendor.routes";
 import branchRoutes from "./infrastructure/routes/branch.routes";
@@ -15,8 +16,17 @@ import { sequelize } from "./infrastructure/database/sequelize.config";
 const app = express();
 app.use(express.json());
 
-const swaggerPath = path.join(__dirname, '../swagger/swagger.yaml');
-const fileContents = fs.readFileSync(swaggerPath, 'utf8');
+const FRONTEND_URL = process.env.FRONTEND_URL;
+
+app.use(
+  cors({
+    origin: FRONTEND_URL,
+    credentials:true
+  })
+);
+
+const swaggerPath = path.join(__dirname, "../swagger/swagger.yaml");
+const fileContents = fs.readFileSync(swaggerPath, "utf8");
 const swaggerDocument = yaml.load(fileContents);
 
 app.use(
