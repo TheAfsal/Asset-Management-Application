@@ -6,6 +6,7 @@ import App from "./App.tsx";
 import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
+import { SnackbarProvider } from "notistack";
 
 const theme = createTheme({
   palette: {
@@ -46,7 +47,12 @@ createRoot(document.getElementById("root")!).render(
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <BrowserRouter>
-        <App />
+        <SnackbarProvider
+          maxSnack={3}
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        >
+          <App />
+        </SnackbarProvider>
       </BrowserRouter>
     </ThemeProvider>
   </StrictMode>

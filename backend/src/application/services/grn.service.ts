@@ -36,7 +36,7 @@ export class GrnService {
     return this.grnRepository.findAll();
   }
 
-  async findById(id: number): Promise<GrnHeader | null> {
+  async findById(id: number): Promise<{ header: GrnHeader; lineItems: GrnLineItem[] } | null> {
     return this.grnRepository.findById(id);
   }
 
@@ -44,3 +44,6 @@ export class GrnService {
     return this.grnRepository.deleteGrn(id);
   }
 }
+
+
+  

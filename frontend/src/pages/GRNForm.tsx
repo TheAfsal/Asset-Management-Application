@@ -1,5 +1,4 @@
 import type React from "react";
-
 import { useForm, FormProvider } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -13,11 +12,12 @@ import {
   Step,
   StepLabel,
   Paper,
+  CircularProgress,
 } from "@mui/material";
 import { Save, Send, Cancel } from "@mui/icons-material";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { useGRN } from "../hooks/useGRN";
 import HeaderForm from "../components/grn/HeaderForm";
 import LineItemTable from "../components/grn/LineItemTable";
@@ -32,6 +32,7 @@ const schema = yup.object({
     vendor_id: yup.number().required("Vendor is required"),
     branch_id: yup.number().required("Branch is required"),
     status: yup.string().oneOf(["draft", "submitted"]).required(),
+    description: yup.string().optional(),
   }),
   lineItems: yup
     .array()
@@ -45,8 +46,8 @@ const schema = yup.object({
         quantity: yup.number().min(1).required("Quantity is required"),
         unit_price: yup.number().min(0).required("Unit Price is required"),
         tax_percent: yup.number().min(0).max(100).required("Tax % is required"),
-        taxable_value: yup.number(),
-        total_amount: yup.number(),
+        taxable_value: yup.number().optional(),
+        total_amount: yup.number().optional(),
       })
     )
     .min(1, "At least one line item is required"),
@@ -55,26 +56,57 @@ const schema = yup.object({
 const steps = ["Header Information", "Line Items", "Review & Submit"];
 
 const GRNForm: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const isEditing = !!id;
+  const { vendors, branches, subcategories, submitGrn, updateGrn, getGrnById, loading } = useGRN();
+  const navigate = useNavigate();
+  const [activeStep, setActiveStep] = useState(0);
+  const [isDirty, setIsDirty] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const methods = useForm<GrnFormData>({
-    //@ts-ignore
     resolver: yupResolver(schema),
     defaultValues: {
       header: {
+        grn_number: "",
+        grn_date: new Date().toISOString().split('T')[0],
+        invoice_number: "",
+        vendor_id: undefined,
+        branch_id: undefined,
         status: "draft",
+        description: "",
       },
       lineItems: [],
     },
   });
 
-  const { vendors, branches, subcategories, submitGrn } = useGRN();
-  const navigate = useNavigate();
-  const [activeStep, setActiveStep] = useState(0);
-  const [isDirty, setIsDirty] = useState(false);
+  useEffect(() => {
+    if (isEditing) {
+      const fetchGrn = async () => {
+        try {
+          const grnData = await getGrnById(parseInt(id!));
+          methods.reset(grnData);
+        } catch {
+          setError("Failed to load GRN data");
+        }
+      };
+      fetchGrn();
+    }
+  }, [id, isEditing, getGrnById, methods]);
 
   const onSubmit = async (data: GrnFormData) => {
-    await submitGrn(data);
-    methods.reset();
-    navigate("/grns");
+    try {
+      if (isEditing) {
+        await updateGrn(parseInt(id!), data);
+      } else {
+        await submitGrn(data);
+      }
+      methods.reset();
+      setIsDirty(false);
+      navigate("/grns");
+    } catch {
+      setError(isEditing ? "Failed to update GRN" : "Failed to create GRN");
+    }
   };
 
   const handleCancel = () => {
@@ -93,13 +125,11 @@ const GRNForm: React.FC = () => {
 
   const handleSaveDraft = () => {
     methods.setValue("header.status", "draft");
-    //@ts-ignore
     methods.handleSubmit(onSubmit)();
   };
 
   const handleSubmitFinal = () => {
     methods.setValue("header.status", "submitted");
-    //@ts-ignore
     methods.handleSubmit(onSubmit)();
   };
 
@@ -145,15 +175,28 @@ const GRNForm: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
           >
             <Typography variant="h4" className="font-bold text-gray-800 mb-2">
-              Create New GRN
+              {isEditing ? "Edit GRN" : "Create New GRN"}
             </Typography>
             <Typography variant="body1" className="text-gray-600">
-              Add a new Goods Receipt Note to your system
+              {isEditing
+                ? "Update an existing Goods Receipt Note"
+                : "Add a new Goods Receipt Note to your system"}
             </Typography>
           </motion.div>
         </Box>
 
-        {/* Stepper */}
+        {error && (
+          <Box className="mb-4">
+            <Typography color="error">{error}</Typography>
+          </Box>
+        )}
+
+        {loading && (
+          <Box className="mb-4 flex justify-center">
+            <CircularProgress />
+          </Box>
+        )}
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -172,7 +215,6 @@ const GRNForm: React.FC = () => {
           </Card>
         </motion.div>
 
-        {/* Form Content */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -181,10 +223,7 @@ const GRNForm: React.FC = () => {
           <Card className="luxury-card border-0 mb-6">
             <CardContent className="p-6">
               <form
-                onSubmit={
-                  //@ts-ignore
-                  methods.handleSubmit(onSubmit)
-                }
+                onSubmit={methods.handleSubmit(onSubmit)}
                 onChange={() => setIsDirty(true)}
               >
                 {renderStepContent(activeStep)}
@@ -193,7 +232,6 @@ const GRNForm: React.FC = () => {
           </Card>
         </motion.div>
 
-        {/* Action Buttons */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -264,7 +302,7 @@ const GRNForm: React.FC = () => {
                       startIcon={<Send />}
                       className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
                     >
-                      Submit
+                      {isEditing ? "Update" : "Submit"}
                     </Button>
                   </motion.div>
                 </Box>

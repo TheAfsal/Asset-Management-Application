@@ -1,5 +1,4 @@
 import type React from "react";
-
 import { useEffect, useState } from "react";
 import {
   Box,
@@ -19,6 +18,7 @@ import {
   TextField,
   InputAdornment,
   Fab,
+  CircularProgress,
 } from "@mui/material";
 import {
   Add,
@@ -35,14 +35,15 @@ import { useGRN } from "../hooks/useGRN";
 import type { GrnHeader } from "../types";
 
 const GRNList: React.FC = () => {
-  const { grns, fetchGrns } = useGRN();
+  const { grns, fetchGrns, deleteGrn, loading } = useGRN();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredGrns, setFilteredGrns] = useState<GrnHeader[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchGrns();
-  }, []);
+  }, []); // Removed fetchGrns from dependencies
 
   useEffect(() => {
     const filtered = grns.filter(
@@ -62,6 +63,25 @@ const GRNList: React.FC = () => {
       default:
         return "default";
     }
+  };
+
+  const handleEdit = (id: number) => {
+    navigate(`/grns/edit/${id}`);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (window.confirm("Are you sure you want to delete this GRN?")) {
+      try {
+        await deleteGrn(id);
+        setError(null);
+      } catch {
+        setError("Failed to delete GRN");
+      }
+    }
+  };
+
+  const handleView = (id: number) => {
+    navigate(`/grns/view/${id}`);
   };
 
   return (
@@ -84,7 +104,18 @@ const GRNList: React.FC = () => {
         </motion.div>
       </Box>
 
-      {/* Search and Actions */}
+      {error && (
+        <Box className="mb-4">
+          <Typography color="error">{error}</Typography>
+        </Box>
+      )}
+
+      {loading && (
+        <Box className="mb-4 flex justify-center">
+          <CircularProgress />
+        </Box>
+      )}
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -145,7 +176,6 @@ const GRNList: React.FC = () => {
         </Card>
       </motion.div>
 
-      {/* GRN Table */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -188,8 +218,6 @@ const GRNList: React.FC = () => {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 20 }}
                       transition={{ delay: index * 0.05 }}
-                      //@ts-ignore
-                      component={TableRow}
                       className="hover:bg-gray-50 transition-colors"
                     >
                       <TableCell className="font-medium text-indigo-600">
@@ -218,6 +246,7 @@ const GRNList: React.FC = () => {
                             <IconButton
                               size="small"
                               className="text-blue-600 hover:bg-blue-50"
+                              onClick={() => handleView(grn.id)}
                             >
                               <Visibility fontSize="small" />
                             </IconButton>
@@ -229,6 +258,7 @@ const GRNList: React.FC = () => {
                             <IconButton
                               size="small"
                               className="text-green-600 hover:bg-green-50"
+                              onClick={() => handleEdit(grn.id)}
                             >
                               <Edit fontSize="small" />
                             </IconButton>
@@ -240,6 +270,7 @@ const GRNList: React.FC = () => {
                             <IconButton
                               size="small"
                               className="text-red-600 hover:bg-red-50"
+                              onClick={() => handleDelete(grn.id)}
                             >
                               <Delete fontSize="small" />
                             </IconButton>
@@ -255,7 +286,6 @@ const GRNList: React.FC = () => {
         </Card>
       </motion.div>
 
-      {/* Floating Action Button */}
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
