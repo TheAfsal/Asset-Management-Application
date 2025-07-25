@@ -10,6 +10,19 @@ export interface GrnHeader {
   updated_at: Date;
 }
 
+export interface Grn {
+  header: GrnHeader;
+  lineItems: GrnLineItem[];
+  total_amount: number;
+}
+
+
+export interface AssetSummary {
+  category_name: string;
+  branch_name: string;
+  asset_count: number;
+}
+
 export interface GrnLineItem {
   id: number;
   grn_id: number;

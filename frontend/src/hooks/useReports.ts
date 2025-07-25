@@ -1,46 +1,90 @@
-import { useState, useEffect } from 'react';
-import type { GrnHeader, Vendor, Branch } from '../types';
+import { useState, useEffect, useCallback } from 'react';
+import type { Vendor, Branch, AssetSubcategory, Grn } from '../types';
 import API from '../services/axiosInstance';
 
-interface AssetSummary {
-  category_name: string;
-  branch_name: string;
-  asset_count: number;
-}
-
 export const useReports = () => {
-  const [grns, setGrns] = useState<GrnHeader[]>([]);
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
-  const [summaries, setSummaries] = useState<AssetSummary[]>([]);
+  const [subcategories, setSubcategories] = useState<AssetSubcategory[]>([]);
+  const [grns, setGrns] = useState<Grn[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchGrns = async () => {
-    const response = await API.get('/grns');
-    setGrns(response.data);
-  };
+  const fetchVendors = useCallback(async () => {
+    try {
+      const response = await API.get('/vendors');
+      setVendors(response.data);
+    } catch (error: any) {
+      console.error('Error fetching vendors:', error);
+      setError(error.response?.data?.message || 'Failed to fetch vendors');
+    }
+  }, []);
 
-  const fetchVendors = async () => {
-    const response = await API.get('/vendors');
-    setVendors(response.data);
-  };
+  const fetchBranches = useCallback(async () => {
+    try {
+      const response = await API.get('/branches');
+      setBranches(response.data);
+    } catch (error: any) {
+      console.error('Error fetching branches:', error);
+      setError(error.response?.data?.message || 'Failed to fetch branches');
+    }
+  }, []);
 
-  const fetchBranches = async () => {
-    const response = await API.get('/branches');
-    setBranches(response.data);
-  };
+  const fetchSubcategories = useCallback(async () => {
+    try {
+      const response = await API.get('/asset-subcategories');
+      setSubcategories(response.data);
+    } catch (error: any) {
+      console.error('Error fetching subcategories:', error);
+      setError(error.response?.data?.message || 'Failed to fetch subcategories');
+    }
+  }, []);
 
-  const fetchAssetSummaries = async () => {
-    // Mock data for asset summary report
-    setSummaries([
-      { category_name: 'Electronics', branch_name: 'Main Branch', asset_count: 50 },
-      { category_name: 'Furniture', branch_name: 'Branch A', asset_count: 20 },
-    ]);
-  };
+  const fetchGrns = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await API.get('/report');
+      const grnsFromApi: Grn[] = response.data;
+
+      console.log('Fetched GRN report:', grnsFromApi);
+
+      // Filter out malformed GRNs
+      const validGrns = grnsFromApi.filter((grn) => {
+        if (!grn.header?.id || isNaN(grn.header.id)) {
+          console.warn(`Invalid GRN header ID:`, grn);
+          return false;
+        }
+        return true;
+      });
+
+      setGrns(validGrns);
+      if (validGrns.length === 0) {
+        setError('No valid GRNs found.');
+      }
+    } catch (error: any) {
+      console.error('Error fetching GRN report:', error);
+      setError(error.response?.data?.message || 'Failed to fetch GRN report');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
 
   useEffect(() => {
     fetchVendors();
     fetchBranches();
-  }, []);
+    fetchSubcategories();
+    fetchGrns();
+  }, [fetchVendors, fetchBranches, fetchSubcategories, fetchGrns]);
 
-  return { grns, vendors, branches, summaries, fetchGrns, fetchAssetSummaries };
+  return {
+    vendors,
+    branches,
+    subcategories,
+    grns,
+    loading,
+    error,
+    fetchGrns,
+  };
 };

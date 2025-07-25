@@ -72,6 +72,44 @@ export class GrnRepositoryImpl implements GrnRepository {
     }));
   }
 
+  // async findAll(): Promise<({ header: GrnHeader; lineItems: GrnLineItem[] })[]> {
+  //   const headers = await GrnHeaderModel.findAll({
+  //     include: [
+  //       {
+  //         model: GrnLineItemModel,
+  //         as: 'lineItems',
+  //       },
+  //     ],
+  //   });
+
+  //   return headers.map((header: any) => ({
+  //     header: {
+  //       id: header.getDataValue('id'),
+  //       grn_number: header.getDataValue('grn_number'),
+  //       grn_date: header.getDataValue('grn_date'),
+  //       invoice_number: header.getDataValue('invoice_number'),
+  //       vendor_id: header.getDataValue('vendor_id'),
+  //       branch_id: header.getDataValue('branch_id'),
+  //       status: header.getDataValue('status') as 'draft' | 'submitted',
+  //       created_at: header.getDataValue('created_at'),
+  //       updated_at: header.getDataValue('updated_at'),
+  //     },
+  //     lineItems: header.get('lineItems')?.map((item: any) => ({
+  //       id: item.getDataValue('id'),
+  //       grn_id: item.getDataValue('grn_id'),
+  //       subcategory_id: item.getDataValue('subcategory_id'),
+  //       item_description: item.getDataValue('item_description') || '',
+  //       quantity: item.getDataValue('quantity'),
+  //       unit_price: item.getDataValue('unit_price'),
+  //       tax_percent: item.getDataValue('tax_percent'),
+  //       taxable_value: item.getDataValue('taxable_value'),
+  //       total_amount: item.getDataValue('total_amount'),
+  //       created_at: item.getDataValue('created_at'),
+  //       updated_at: item.getDataValue('updated_at'),
+  //     })) || [],
+  //   }));
+  // }
+
   // async findById(id: number): Promise<GrnHeader | null> {
   //   const header = await GrnHeaderModel.findByPk(id);
   //   if (!header) return null;

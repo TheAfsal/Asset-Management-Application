@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
 import {
   Drawer,
@@ -12,7 +12,7 @@ import {
   Collapse,
   Box,
   Typography,
-} from "@mui/material"
+} from "@mui/material";
 import {
   Dashboard,
   Receipt,
@@ -26,15 +26,15 @@ import {
   ExpandMore,
   Add,
   List as ListIcon,
-} from "@mui/icons-material"
-import { motion, AnimatePresence } from "framer-motion"
-import { useState } from "react"
-import { useNavigate, useLocation } from "react-router-dom"
+} from "@mui/icons-material";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface SidebarProps {
-  open: boolean
-  setOpen: (open: boolean) => void
-  isMobile: boolean
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  isMobile: boolean;
 }
 
 const menuItems = [
@@ -59,7 +59,11 @@ const menuItems = [
     color: "from-purple-500 to-violet-500",
     children: [
       { title: "Asset Categories", path: "/asset-categories", icon: Category },
-      { title: "Asset Subcategories", path: "/asset-subcategories", icon: AccountTree },
+      {
+        title: "Asset Subcategories",
+        path: "/asset-subcategories",
+        icon: AccountTree,
+      },
       { title: "Branches", path: "/branches", icon: Business },
       { title: "Vendors", path: "/vendors", icon: Store },
       { title: "Manufacturers", path: "/manufacturers", icon: Factory },
@@ -71,33 +75,40 @@ const menuItems = [
     color: "from-orange-500 to-red-500",
     children: [
       { title: "GRN Register", path: "/reports/grn-register", icon: Receipt },
-      { title: "Asset Summary", path: "/reports/asset-summary", icon: Assessment },
     ],
   },
-]
+];
 
 const Sidebar: React.FC<SidebarProps> = ({ open, setOpen, isMobile }) => {
-  const [expandedItems, setExpandedItems] = useState<string[]>(["GRNs"])
-  const navigate = useNavigate()
-  const location = useLocation()
+  const [expandedItems, setExpandedItems] = useState<string[]>(["GRNs"]);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const handleExpand = (title: string) => {
-    setExpandedItems((prev) => (prev.includes(title) ? prev.filter((item) => item !== title) : [...prev, title]))
-  }
+    setExpandedItems((prev) =>
+      prev.includes(title)
+        ? prev.filter((item) => item !== title)
+        : [...prev, title]
+    );
+  };
 
   const handleNavigation = (path: string) => {
-    navigate(path)
+    navigate(path);
     if (isMobile) {
-      setOpen(false)
+      setOpen(false);
     }
-  }
+  };
 
-  const isActive = (path: string) => location.pathname === path
+  const isActive = (path: string) => location.pathname === path;
 
   const sidebarContent = (
     <Box className="h-full bg-gradient-to-b from-white to-gray-50">
       <Box className="p-6 border-b border-gray-100">
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center"
+        >
           <Typography variant="h6" className="font-bold text-gray-800 mb-1">
             Asset Management
           </Typography>
@@ -119,9 +130,9 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen, isMobile }) => {
               <ListItemButton
                 onClick={() => {
                   if (item.children) {
-                    handleExpand(item.title)
+                    handleExpand(item.title);
                   } else {
-                    handleNavigation(item.path!)
+                    handleNavigation(item.path!);
                   }
                 }}
                 className={`rounded-xl transition-all duration-300 hover:shadow-lg ${
@@ -137,20 +148,38 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen, isMobile }) => {
                       isActive(item.path || "") ? "bg-white/20" : ""
                     }`}
                   >
-                    <item.icon className={isActive(item.path || "") ? "text-white" : "text-white"} />
+                    <item.icon
+                      className={
+                        isActive(item.path || "") ? "text-white" : "text-white"
+                      }
+                    />
                   </Box>
                 </ListItemIcon>
                 <ListItemText
                   primary={item.title}
                   primaryTypographyProps={{
-                    className: `font-medium ${isActive(item.path || "") ? "text-white" : "text-gray-700"}`,
+                    className: `font-medium ${
+                      isActive(item.path || "") ? "text-white" : "text-gray-700"
+                    }`,
                   }}
                 />
                 {item.children &&
                   (expandedItems.includes(item.title) ? (
-                    <ExpandLess className={isActive(item.path || "") ? "text-white" : "text-gray-400"} />
+                    <ExpandLess
+                      className={
+                        isActive(item.path || "")
+                          ? "text-white"
+                          : "text-gray-400"
+                      }
+                    />
                   ) : (
-                    <ExpandMore className={isActive(item.path || "") ? "text-white" : "text-gray-400"} />
+                    <ExpandMore
+                      className={
+                        isActive(item.path || "")
+                          ? "text-white"
+                          : "text-gray-400"
+                      }
+                    />
                   ))}
               </ListItemButton>
             </ListItem>
@@ -183,14 +212,20 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen, isMobile }) => {
                             >
                               <ListItemIcon>
                                 <child.icon
-                                  className={`text-sm ${isActive(child.path) ? "text-indigo-600" : "text-gray-400"}`}
+                                  className={`text-sm ${
+                                    isActive(child.path)
+                                      ? "text-indigo-600"
+                                      : "text-gray-400"
+                                  }`}
                                 />
                               </ListItemIcon>
                               <ListItemText
                                 primary={child.title}
                                 primaryTypographyProps={{
                                   className: `text-sm font-medium ${
-                                    isActive(child.path) ? "text-indigo-600" : "text-gray-600"
+                                    isActive(child.path)
+                                      ? "text-indigo-600"
+                                      : "text-gray-600"
                                   }`,
                                 }}
                               />
@@ -207,7 +242,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen, isMobile }) => {
         ))}
       </List>
     </Box>
-  )
+  );
 
   return (
     <Drawer
@@ -228,7 +263,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen, isMobile }) => {
     >
       {sidebarContent}
     </Drawer>
-  )
-}
+  );
+};
 
-export default Sidebar
+export default Sidebar;

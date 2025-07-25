@@ -1,60 +1,73 @@
-import * as XLSX from "exceljs";
-import axios from "axios";
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
+import type { Grn, Vendor, Branch } from '../types';
 
-export const exportToExcel = async (
-  data: any[],
+interface ColumnDefinition {
+  header: string;
+  key: string;
+  formatter?: (value: any, rowData?: Grn, vendors?: Vendor[], branches?: Branch[]) => string | number;
+  width?: number;
+}
+
+export const exportToExcel = (
+  data: Grn[],
   fileName: string,
-  columns: { header: string; key: string; formatter?: (value: any) => string }[]
+  columns: ColumnDefinition[],
+  vendors: Vendor[] = [],
+  branches: Branch[] = []
 ) => {
-  const workbook = new XLSX.Workbook();
-  const worksheet = workbook.addWorksheet(fileName);
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('GRN Report');
 
+  // Define columns
   worksheet.columns = columns.map((col) => ({
     header: col.header,
     key: col.key,
+    width: col.width || 15,
   }));
+
+  // Style header row
+  worksheet.getRow(1).font = { bold: true };
+  worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+  worksheet.getRow(1).fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFD3D3D3' }, // Light gray background
+  };
+
+  // Add data rows
   data.forEach((item) => {
-    worksheet.addRow(
-      columns.reduce((row, col) => {
-        //@ts-ignore
-        row[col.key] = col.formatter
-          ? col.formatter(item[col.key])
-          : item[col.key];
-        return row;
-      }, {})
-    );
-  });
-
-  const buffer = await workbook.xlsx.writeBuffer();
-  const blob = new Blob([buffer], {
-    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = `${fileName}.xlsx`;
-  link.click();
-};
-
-export const importFromExcel = async (file: File, endpoint: string) => {
-  const workbook = new XLSX.Workbook();
-  const arrayBuffer = await file.arrayBuffer();
-  await workbook.xlsx.load(arrayBuffer);
-  const worksheet = workbook.getWorksheet(1);
-  const data: any[] = [];
-
-  if (!worksheet) {
-    return;
-  }
-
-  worksheet.eachRow((row, rowNumber) => {
-    if (rowNumber > 1) {
-      const rowData: any = {};
-      row.eachCell((cell, colNumber) => {
-        rowData[worksheet.columns[colNumber - 1]!.key!] = cell.value;
-      });
-      data.push(rowData);
+    const rowData: Record<string, any> = {};
+    columns.forEach((col) => {
+      const keys = col.key.split('.');
+      let value = item;
+      for (const key of keys) {
+        value = value ? (value as any)[key] : null;
+      }
+      rowData[col.key] = col.formatter ? col.formatter(value, item, vendors, branches) : value;
+    });
+    const row = worksheet.addRow(rowData);
+    // Format Total Amount column as currency
+    if (rowData['total_amount']) {
+      const cell = row.getCell('total_amount');
+      cell.numFmt = '$#,##0.00'; // Format as currency (e.g., 7080.00)
     }
   });
 
-  await Promise.all(data.map((item) => axios.post(endpoint, item)));
+  // Auto-adjust column widths based on content (optional)
+  worksheet.columns.forEach((column) => {
+    let maxLength = column.header!.length;
+    worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+      if (rowNumber === 1) return; // Skip header row
+      const cellValue = row.getCell(column.key!).value?.toString() || '';
+      maxLength = Math.max(maxLength, cellValue.length);
+    });
+    column.width = Math.min(maxLength + 2, 50); // Cap width at 50
+  });
+
+  // Generate and save the file
+  workbook.xlsx.writeBuffer().then((buffer) => {
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, `${fileName}.xlsx`);
+  });
 };

@@ -20,15 +20,7 @@ import {
   Fab,
   CircularProgress,
 } from "@mui/material";
-import {
-  Add,
-  Search,
-  FilterList,
-  Edit,
-  Delete,
-  Visibility,
-  GetApp,
-} from "@mui/icons-material";
+import { Add, Search, Edit, Delete, Visibility } from "@mui/icons-material";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useGRN } from "../hooks/useGRN";
@@ -43,14 +35,16 @@ const GRNList: React.FC = () => {
 
   useEffect(() => {
     fetchGrns();
-  }, []); // Removed fetchGrns from dependencies
+  }, []);
 
   useEffect(() => {
     const filtered = grns.filter(
       (grn) =>
-        grn.grn_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        grn.invoice_number.toLowerCase().includes(searchTerm.toLowerCase())
+        grn?.grn_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        grn?.invoice_number?.toLowerCase().includes(searchTerm.toLowerCase())
     );
+    console.log(filtered);
+
     setFilteredGrns(filtered);
   }, [grns, searchTerm]);
 
@@ -143,20 +137,6 @@ const GRNList: React.FC = () => {
                 }}
               />
               <Box className="flex gap-2">
-                <Button
-                  variant="outlined"
-                  startIcon={<FilterList />}
-                  className="border-gray-300 text-gray-700 hover:border-indigo-500 hover:text-indigo-600"
-                >
-                  Filter
-                </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<GetApp />}
-                  className="border-gray-300 text-gray-700 hover:border-indigo-500 hover:text-indigo-600"
-                >
-                  Export
-                </Button>
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}

@@ -5,6 +5,7 @@ import path from "path";
 import fs from "fs";
 import cors from "cors";
 import grnRoutes from "./infrastructure/routes/grn.routes";
+import reportRoutes from "./infrastructure/routes/report.routes";
 import vendorRoutes from "./infrastructure/routes/vendor.routes";
 import branchRoutes from "./infrastructure/routes/branch.routes";
 import assetCategoryRoutes from "./infrastructure/routes/asset-category.routes";
@@ -41,6 +42,7 @@ app.use("/api/v1/branches", branchRoutes);
 app.use("/api/v1/asset-categories", assetCategoryRoutes);
 app.use("/api/v1/asset-subcategories", assetSubcategoryRoutes);
 app.use("/api/v1/manufacturers", manufacturerRoutes);
+app.use("/api/v1/report", reportRoutes);
 
 app.use(errorMiddleware);
 

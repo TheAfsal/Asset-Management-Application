@@ -15,7 +15,7 @@ import BranchList from "./pages/BranchList/index";
 import VendorList from "./pages/VendorList/index";
 import ManufacturerList from "./pages/ManufacturerList/index";
 import GrnRegisterReportPage from "./pages/GrnRegisterReportPage";
-import AssetSummaryReportPage from "./pages/AssetSummaryReportPage";
+import GRNView from "./pages/GRNView";
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -45,14 +45,10 @@ const App: React.FC = () => {
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<HomePage />} />
-          {/* <Route path="/grns" element={<GRNList />} />
-          <Route path="/grns/new" element={<GRNForm />} /> */}
-          {/* // */}
           <Route path="/grns" element={<GRNList />} />
           <Route path="/grns/new" element={<GRNForm />} />
           <Route path="/grns/edit/:id" element={<GRNForm />} />
-          {/* <Route path="/grns/view/:id" element={<GRNView />} /> */}
-          {/* // */}
+          <Route path="/grns/view/:id" element={<GRNView />} />
           <Route path="/asset-categories" element={<AssetCategoryList />} />
           <Route
             path="/asset-subcategories"
@@ -64,10 +60,6 @@ const App: React.FC = () => {
           <Route
             path="/reports/grn-register"
             element={<GrnRegisterReportPage />}
-          />
-          <Route
-            path="/reports/asset-summary"
-            element={<AssetSummaryReportPage />}
           />
         </Routes>
       </AnimatePresence>
