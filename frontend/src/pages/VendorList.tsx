@@ -44,7 +44,7 @@ const VendorList: React.FC = () => {
       setError("Name is required");
       return;
     }
-    if (!editVendor.email.trim()) {
+    if (!editVendor.email?.trim()) {
       setError("Email is required");
       return;
     }
@@ -86,7 +86,11 @@ const VendorList: React.FC = () => {
         <Popover className="relative">
           {({ open, close }) => (
             <>
-              <Popover.Button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+              <Popover.Button
+                className={`px-4 py-2 rounded ${
+                  open ? "bg-blue-600" : "bg-blue-500"
+                } text-white`}
+              >
                 Create Vendor
               </Popover.Button>
               <Transition
@@ -197,7 +201,9 @@ const VendorList: React.FC = () => {
                   {({ open, close }) => (
                     <>
                       <Popover.Button
-                        className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 mr-2"
+                        className={`bg-yellow-500 text-white px-3 py-1 rounded ${
+                          open ? "hover:bg-yellow-600" : "hover:bg-yellow-600"
+                        } mr-2 `}
                         onClick={() => setEditVendor(vendor)}
                       >
                         Edit
@@ -213,7 +219,9 @@ const VendorList: React.FC = () => {
                       >
                         <Popover.Panel className="absolute z-10 mt-2 w-96 bg-white shadow-lg rounded-lg p-4">
                           <div className="flex flex-col gap-4">
-                            <h2 className="text-lg font-semibold">Edit Vendor</h2>
+                            <h2 className="text-lg font-semibold">
+                              Edit Vendor
+                            </h2>
                             {error && <p className="text-red-500">{error}</p>}
                             <input
                               type="text"

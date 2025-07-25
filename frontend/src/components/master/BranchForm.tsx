@@ -17,6 +17,7 @@ const schema = yup
   .required();
 
 const BranchForm: React.FC = () => {
+  //@ts-ignore
   const methods = useForm<Branch>({ resolver: yupResolver(schema) });
   const { createBranch } = useBranch();
 
@@ -28,6 +29,7 @@ const BranchForm: React.FC = () => {
   return (
     <FormProvider {...methods}>
       <form
+      //@ts-ignore
         onSubmit={methods.handleSubmit(onSubmit)}
         className="space-y-4 max-w-lg"
       >

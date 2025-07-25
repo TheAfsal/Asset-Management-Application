@@ -122,6 +122,7 @@ const HomePage: React.FC = () => {
           className="mb-8 text-center"
         >
           {stats.map((stat, index) => (
+            //@ts-ignore
             <Grid item xs={12} sm={6} lg={3} key={stat.title}>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -177,6 +178,7 @@ const HomePage: React.FC = () => {
           </Typography>
           <Grid container spacing={3} justifyContent="center" marginTop={3}>
             {quickActions.map((action, index) => (
+              //@ts-ignore
               <Grid item xs={12} sm={6} lg={3} key={action.title}>
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}

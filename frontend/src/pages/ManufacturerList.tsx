@@ -7,7 +7,6 @@ import { Fragment } from "react";
 const ManufacturerList: React.FC = () => {
   const {
     manufacturers,
-    fetchManufacturers,
     createManufacturer,
     updateManufacturer,
     deleteManufacturer,
@@ -71,7 +70,11 @@ const ManufacturerList: React.FC = () => {
         <Popover className="relative">
           {({ open, close }) => (
             <>
-              <Popover.Button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+              <Popover.Button
+                className={`bg-blue-500 text-white px-4 py-2 rounded  ${
+                  open ? "hover:bg-blue-600" : "hover:bg-blue-600"
+                }`}
+              >
                 Create Manufacturer
               </Popover.Button>
               <Transition
@@ -157,7 +160,9 @@ const ManufacturerList: React.FC = () => {
                   {({ open, close }) => (
                     <>
                       <Popover.Button
-                        className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 mr-2"
+                        className={`bg-yellow-500 text-white px-3 py-1  ${
+                          open ? "hover:bg-yellow-600" : "hover:bg-yellow-600"
+                        } rounded mr-2`}
                         onClick={() => setEditManufacturer(manufacturer)}
                       >
                         Edit

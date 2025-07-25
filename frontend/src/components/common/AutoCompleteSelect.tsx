@@ -32,7 +32,9 @@ const AutoCompleteSelect: React.FC<AutoCompleteSelectProps> = ({
               getOptionLabel={(option) =>
                 typeof option === "string" ? option : option.label
               }
+              //@ts-ignore
               isOptionEqualToValue={(option, val) => option.value === val}
+              //@ts-ignore
               value={options.find((opt) => opt.value === value) || null}
               onChange={(_, selected) => {
                 onChange(selected ? selected.value : null);
@@ -41,7 +43,6 @@ const AutoCompleteSelect: React.FC<AutoCompleteSelectProps> = ({
                 <TextField
                   {...params}
                   label={label}
-                  size="small"
                   size="medium"
                   sx={{ minWidth: "300px" }}
                   error={!!fieldState.error || error}

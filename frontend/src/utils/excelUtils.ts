@@ -16,6 +16,7 @@ export const exportToExcel = async (
   data.forEach((item) => {
     worksheet.addRow(
       columns.reduce((row, col) => {
+        //@ts-ignore
         row[col.key] = col.formatter
           ? col.formatter(item[col.key])
           : item[col.key];

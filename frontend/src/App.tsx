@@ -24,6 +24,8 @@ const App: React.FC = () => {
   const authPages = ["/login", "/signup"]
   const isAuthPage = authPages.includes(location.pathname)
 
+  console.log(isAuthenticated);
+
   if (isAuthPage) {
     return (
       <AnimatePresence mode="wait">

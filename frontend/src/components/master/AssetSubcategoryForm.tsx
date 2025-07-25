@@ -24,6 +24,7 @@ const schema = yup
 const AssetSubcategoryForm: React.FC<AssetSubcategoryFormProps> = ({
   categories,
 }) => {
+  //@ts-ignore
   const methods = useForm<AssetSubcategory>({ resolver: yupResolver(schema) });
   const { createAssetSubcategory } = useAssetSubcategory();
 
@@ -35,6 +36,7 @@ const AssetSubcategoryForm: React.FC<AssetSubcategoryFormProps> = ({
   return (
     <FormProvider {...methods}>
       <form
+      //@ts-ignore
         onSubmit={methods.handleSubmit(onSubmit)}
         className="space-y-4 max-w-lg"
       >

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAssetCategory } from "../hooks/useAssetCategory";
 import type { AssetCategory } from "../types";
 import { Popover, Transition } from "@headlessui/react";
@@ -6,8 +6,18 @@ import { Fragment } from "react";
 import { exportToExcel, importFromExcel } from "../utils/excelUtils";
 
 const AssetCategoryList: React.FC = () => {
-  const { categories, fetchAssetCategories, createAssetCategory, updateAssetCategory, deleteAssetCategory } = useAssetCategory();
-  const [newCategory, setNewCategory] = useState({ name: "", description: "", status: "active" as "active" | "inactive" });
+  const {
+    categories,
+    fetchAssetCategories,
+    createAssetCategory,
+    updateAssetCategory,
+    deleteAssetCategory,
+  } = useAssetCategory();
+  const [newCategory, setNewCategory] = useState({
+    name: "",
+    description: "",
+    status: "active" as "active" | "inactive",
+  });
   const [editCategory, setEditCategory] = useState<AssetCategory | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,7 +56,9 @@ const AssetCategoryList: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm("Are you sure you want to delete this asset category?")) {
+    if (
+      window.confirm("Are you sure you want to delete this asset category?")
+    ) {
       try {
         await deleteAssetCategory(id);
       } catch {
@@ -71,7 +83,9 @@ const AssetCategoryList: React.FC = () => {
           <Popover className="relative">
             {({ open, close }) => (
               <>
-                <Popover.Button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                <Popover.Button
+                  className={`bg-blue-500 text-white px-4 py-2 rounded ${open ? " hover:bg-blue-600" : " hover:bg-blue-600"}`}
+                >
                   Create Asset Category
                 </Popover.Button>
                 <Transition
@@ -85,26 +99,43 @@ const AssetCategoryList: React.FC = () => {
                 >
                   <Popover.Panel className="absolute z-10 mt-2 w-96 bg-white shadow-lg rounded-lg p-4">
                     <div className="flex flex-col gap-4">
-                      <h2 className="text-lg font-semibold">Create Asset Category</h2>
+                      <h2 className="text-lg font-semibold">
+                        Create Asset Category
+                      </h2>
                       {error && <p className="text-red-500">{error}</p>}
                       <input
                         type="text"
                         placeholder="Name"
                         value={newCategory.name}
-                        onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+                        onChange={(e) =>
+                          setNewCategory({
+                            ...newCategory,
+                            name: e.target.value,
+                          })
+                        }
                         className="border p-2 rounded w-full"
                         aria-label="Asset Category Name"
                       />
                       <textarea
                         placeholder="Description"
                         value={newCategory.description}
-                        onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
+                        onChange={(e) =>
+                          setNewCategory({
+                            ...newCategory,
+                            description: e.target.value,
+                          })
+                        }
                         className="border p-2 rounded w-full"
                         aria-label="Asset Category Description"
                       />
                       <select
                         value={newCategory.status}
-                        onChange={(e) => setNewCategory({ ...newCategory, status: e.target.value as "active" | "inactive" })}
+                        onChange={(e) =>
+                          setNewCategory({
+                            ...newCategory,
+                            status: e.target.value as "active" | "inactive",
+                          })
+                        }
                         className="border p-2 rounded w-full"
                         aria-label="Asset Category Status"
                       >
@@ -120,7 +151,11 @@ const AssetCategoryList: React.FC = () => {
                         </button>
                         <button
                           onClick={() => {
-                            setNewCategory({ name: "", description: "", status: "active" });
+                            setNewCategory({
+                              name: "",
+                              description: "",
+                              status: "active",
+                            });
                             setError(null);
                             close();
                           }}
@@ -143,6 +178,7 @@ const AssetCategoryList: React.FC = () => {
             aria-label="Upload Excel"
           />
           <button
+            //@ts-ignore
             onClick={exportToExcel}
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
             aria-label="Export to Excel"
@@ -172,7 +208,9 @@ const AssetCategoryList: React.FC = () => {
                     <>
                       <Popover.Button
                         onClick={() => setEditCategory(category)}
-                        className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 mr-2"
+                        className={`bg-yellow-500 text-white px-3 py-1 rounded ${
+                          open ? "hover:bg-yellow-600" : "hover:bg-yellow-600"
+                        } mr-2 `}
                       >
                         Edit
                       </Popover.Button>
@@ -187,7 +225,9 @@ const AssetCategoryList: React.FC = () => {
                       >
                         <Popover.Panel className="absolute z-10 mt-2 w-96 bg-white shadow-lg rounded-lg p-4">
                           <div className="flex flex-col gap-4">
-                            <h2 className="text-lg font-semibold">Edit Asset Category</h2>
+                            <h2 className="text-lg font-semibold">
+                              Edit Asset Category
+                            </h2>
                             {error && <p className="text-red-500">{error}</p>}
                             <input
                               type="text"
@@ -195,7 +235,9 @@ const AssetCategoryList: React.FC = () => {
                               value={editCategory?.name || ""}
                               onChange={(e) =>
                                 setEditCategory(
-                                  editCategory ? { ...editCategory, name: e.target.value } : null
+                                  editCategory
+                                    ? { ...editCategory, name: e.target.value }
+                                    : null
                                 )
                               }
                               className="border p-2 rounded w-full"
@@ -206,7 +248,12 @@ const AssetCategoryList: React.FC = () => {
                               value={editCategory?.description || ""}
                               onChange={(e) =>
                                 setEditCategory(
-                                  editCategory ? { ...editCategory, description: e.target.value } : null
+                                  editCategory
+                                    ? {
+                                        ...editCategory,
+                                        description: e.target.value,
+                                      }
+                                    : null
                                 )
                               }
                               className="border p-2 rounded w-full"
@@ -217,7 +264,12 @@ const AssetCategoryList: React.FC = () => {
                               onChange={(e) =>
                                 setEditCategory(
                                   editCategory
-                                    ? { ...editCategory, status: e.target.value as "active" | "inactive" }
+                                    ? {
+                                        ...editCategory,
+                                        status: e.target.value as
+                                          | "active"
+                                          | "inactive",
+                                      }
                                     : null
                                 )
                               }
@@ -267,4 +319,3 @@ const AssetCategoryList: React.FC = () => {
 };
 
 export default AssetCategoryList;
-

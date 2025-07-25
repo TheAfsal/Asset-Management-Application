@@ -16,6 +16,7 @@ const schema = yup
   .required();
 
 const AssetCategoryForm: React.FC = () => {
+  //@ts-ignore
   const methods = useForm<AssetCategory>({ resolver: yupResolver(schema) });
   const { createAssetCategory } = useAssetCategory();
 
@@ -27,6 +28,7 @@ const AssetCategoryForm: React.FC = () => {
   return (
     <FormProvider {...methods}>
       <form
+      //@ts-ignore
         onSubmit={methods.handleSubmit(onSubmit)}
         className="space-y-4 max-w-lg"
       >

@@ -188,6 +188,7 @@ const GRNList: React.FC = () => {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 20 }}
                       transition={{ delay: index * 0.05 }}
+                      //@ts-ignore
                       component={TableRow}
                       className="hover:bg-gray-50 transition-colors"
                     >

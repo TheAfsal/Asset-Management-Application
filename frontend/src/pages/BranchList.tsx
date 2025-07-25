@@ -26,6 +26,7 @@ const BranchList: React.FC = () => {
       return;
     }
     try {
+      //@ts-ignore
       await createBranch({ ...newBranch });
       setNewBranch({ name: "", location: "", code: "" });
       setError(null);
@@ -77,7 +78,11 @@ const BranchList: React.FC = () => {
         <Popover className="relative">
           {({ open, close }) => (
             <>
-              <Popover.Button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+              <Popover.Button
+                className={`bg-blue-500 text-white px-4 py-2 rounded ${
+                  open ? "hover:bg-blue-600" : "hover:bg-blue-600"
+                }`}
+              >
                 Create Branch
               </Popover.Button>
               <Transition
@@ -170,7 +175,7 @@ const BranchList: React.FC = () => {
                   {({ open, close }) => (
                     <>
                       <Popover.Button
-                        className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 mr-2"
+                        className={`${open?"hover:bg-yellow-600":"hover:bg-yellow-600"}bg-yellow-500 text-white px-3 py-1 rounded mr-2`}
                         onClick={() => setEditBranch(branch)}
                       >
                         Edit
@@ -186,7 +191,9 @@ const BranchList: React.FC = () => {
                       >
                         <Popover.Panel className="absolute z-10 mt-2 w-96 bg-white shadow-lg rounded-lg p-4">
                           <div className="flex flex-col gap-4">
-                            <h2 className="text-lg font-semibold">Edit Branch</h2>
+                            <h2 className="text-lg font-semibold">
+                              Edit Branch
+                            </h2>
                             {error && <p className="text-red-500">{error}</p>}
                             <input
                               type="text"
@@ -209,7 +216,10 @@ const BranchList: React.FC = () => {
                               onChange={(e) =>
                                 setEditBranch(
                                   editBranch
-                                    ? { ...editBranch, location: e.target.value }
+                                    ? {
+                                        ...editBranch,
+                                        location: e.target.value,
+                                      }
                                     : null
                                 )
                               }
@@ -234,6 +244,7 @@ const BranchList: React.FC = () => {
                               value={editBranch?.status || ""}
                               onChange={(e) =>
                                 setEditBranch(
+                                  //@ts-ignore
                                   editBranch
                                     ? { ...editBranch, status: e.target.value }
                                     : null

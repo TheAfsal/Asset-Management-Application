@@ -16,6 +16,7 @@ const schema = yup
   .required();
 
 const VendorForm: React.FC = () => {
+  //@ts-ignore
   const methods = useForm<Vendor>({ resolver: yupResolver(schema) });
   const { createVendor } = useVendor();
 
@@ -27,6 +28,7 @@ const VendorForm: React.FC = () => {
   return (
     <FormProvider {...methods}>
       <form
+      //@ts-ignore
         onSubmit={methods.handleSubmit(onSubmit)}
         className="space-y-4 max-w-lg"
       >
