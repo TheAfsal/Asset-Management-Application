@@ -36,4 +36,33 @@ export class VendorRepositoryImpl implements VendorRepository {
       updated_at: vendor.getDataValue('updated_at'),
     }));
   }
+
+  async update(id: number, vendor: Partial<Vendor>): Promise<Vendor> {
+    await VendorModel.update(
+      {
+        ...vendor,
+        updated_at: new Date(),
+      },
+      { where: { id } }
+    );
+    const updated = await VendorModel.findByPk(id);
+    if (!updated) {
+      throw new Error('Vendor not found');
+    }
+    return {
+      id: updated.getDataValue('id'),
+      name: updated.getDataValue('name'),
+      contact_person: updated.getDataValue('contact_person'),
+      email: updated.getDataValue('email'),
+      phone: updated.getDataValue('phone'),
+      address: updated.getDataValue('address'),
+      gst_number: updated.getDataValue('gst_number'),
+      created_at: updated.getDataValue('created_at'),
+      updated_at: updated.getDataValue('updated_at'),
+    };
+  }
+
+  async delete(id: number): Promise<void> {
+    await VendorModel.destroy({ where: { id } });
+  }
 }

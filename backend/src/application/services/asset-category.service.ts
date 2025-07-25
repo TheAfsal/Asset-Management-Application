@@ -18,4 +18,12 @@ export class AssetCategoryService {
   async findAll(): Promise<AssetCategory[]> {
     return this.repository.findAll();
   }
+
+  async delete(id: number): Promise<void> {
+    return this.repository.delete(id);
+  }
+
+  async update(id: number, category: Partial<AssetCategory>): Promise<AssetCategory> {
+    return this.repository.update(id, category);
+  }
 }

@@ -18,4 +18,12 @@ export class ManufacturerService {
   async findAll(): Promise<Manufacturer[]> {
     return this.repository.findAll();
   }
+
+  async update(id: number, manufacturer: Partial<Manufacturer>): Promise<Manufacturer> {
+    return this.repository.update(id, manufacturer);
+  }
+
+  async delete(id: number): Promise<void> {
+    return this.repository.delete(id);
+  }
 }

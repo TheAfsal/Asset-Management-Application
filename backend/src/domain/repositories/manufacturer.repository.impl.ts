@@ -28,4 +28,29 @@ export class ManufacturerRepositoryImpl implements ManufacturerRepository {
       updated_at: manufacturer.getDataValue('updated_at'),
     }));
   }
+
+  async update(id: number, manufacturer: Partial<Manufacturer>): Promise<Manufacturer> {
+    await ManufacturerModel.update(
+      {
+        ...manufacturer,
+        updated_at: new Date(),
+      },
+      { where: { id } }
+    );
+    const updated = await ManufacturerModel.findByPk(id);
+    if (!updated) {
+      throw new Error('Manufacturer not found');
+    }
+    return {
+      id: updated.getDataValue('id'),
+      name: updated.getDataValue('name'),
+      description: updated.getDataValue('description'),
+      created_at: updated.getDataValue('created_at'),
+      updated_at: updated.getDataValue('updated_at'),
+    };
+  }
+
+  async delete(id: number): Promise<void> {
+    await ManufacturerModel.destroy({ where: { id } });
+  }
 }

@@ -32,4 +32,31 @@ export class AssetSubcategoryRepositoryImpl implements AssetSubcategoryRepositor
       updated_at: subcategory.getDataValue('updated_at'),
     }));
   }
+
+  async update(id: number, subcategory: Partial<AssetSubcategory>): Promise<AssetSubcategory> {
+    await AssetSubcategoryModel.update(
+      {
+        ...subcategory,
+        updated_at: new Date(),
+      },
+      { where: { id } }
+    );
+    const updated = await AssetSubcategoryModel.findByPk(id);
+    if (!updated) {
+      throw new Error('Asset subcategory not found');
+    }
+    return {
+      id: updated.getDataValue('id'),
+      category_id: updated.getDataValue('category_id'),
+      name: updated.getDataValue('name'),
+      description: updated.getDataValue('description'),
+      status: updated.getDataValue('status') as 'active' | 'inactive',
+      created_at: updated.getDataValue('created_at'),
+      updated_at: updated.getDataValue('updated_at'),
+    };
+  }
+
+  async delete(id: number): Promise<void> {
+    await AssetSubcategoryModel.destroy({ where: { id } });
+  }
 }

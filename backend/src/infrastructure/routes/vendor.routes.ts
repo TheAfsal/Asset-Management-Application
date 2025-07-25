@@ -9,5 +9,7 @@ const controller = new VendorController(vendorService);
 
 router.post("/", controller.create.bind(controller));
 router.get("/", controller.findAll.bind(controller));
+router.put('/:id', controller.update.bind(controller));
+router.delete('/:id', controller.delete.bind(controller));
 
 export default router;

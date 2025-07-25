@@ -18,4 +18,12 @@ export class VendorService {
   async findAll(): Promise<Vendor[]> {
     return this.vendorRepository.findAll();
   }
+
+  async update(id: number, vendor: Partial<Vendor>): Promise<Vendor> {
+    return this.vendorRepository.update(id, vendor);
+  }
+
+  async delete(id: number): Promise<void> {
+    return this.vendorRepository.delete(id);
+  }
 }

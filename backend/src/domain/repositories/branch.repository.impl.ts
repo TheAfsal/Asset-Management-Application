@@ -32,4 +32,31 @@ export class BranchRepositoryImpl implements BranchRepository {
       updated_at: branch.getDataValue('updated_at'),
     }));
   }
+
+  async update(id: number, branch: Partial<Branch>): Promise<Branch> {
+    await BranchModel.update(
+      {
+        ...branch,
+        updated_at: new Date(),
+      },
+      { where: { id } }
+    );
+    const updated = await BranchModel.findByPk(id);
+    if (!updated) {
+      throw new Error('Branch not found');
+    }
+    return {
+      id: updated.getDataValue('id'),
+      name: updated.getDataValue('name'),
+      location: updated.getDataValue('location'),
+      code: updated.getDataValue('code'),
+      status: updated.getDataValue('status') as 'active' | 'inactive',
+      created_at: updated.getDataValue('created_at'),
+      updated_at: updated.getDataValue('updated_at'),
+    };
+  }
+
+  async delete(id: number): Promise<void> {
+    await BranchModel.destroy({ where: { id } });
+  }
 }

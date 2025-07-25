@@ -30,4 +30,30 @@ export class AssetCategoryRepositoryImpl implements AssetCategoryRepository {
       updated_at: category.getDataValue('updated_at'),
     }));
   }
+
+  async delete(id: number): Promise<void> {
+    await AssetCategoryModel.destroy({ where: { id } });
+  }
+
+  async update(id: number, category: Partial<AssetCategory>): Promise<AssetCategory> {
+    await AssetCategoryModel.update(
+      {
+        ...category,
+        updated_at: new Date(),
+      },
+      { where: { id } }
+    );
+    const updated = await AssetCategoryModel.findByPk(id);
+    if (!updated) {
+      throw new Error('Asset category not found');
+    }
+    return {
+      id: updated.getDataValue('id'),
+      name: updated.getDataValue('name'),
+      description: updated.getDataValue('description'),
+      status: updated.getDataValue('status') as 'active' | 'inactive',
+      created_at: updated.getDataValue('created_at'),
+      updated_at: updated.getDataValue('updated_at'),
+    };
+  }
 }

@@ -18,4 +18,12 @@ export class BranchService {
   async findAll(): Promise<Branch[]> {
     return this.branchRepository.findAll();
   }
+
+  async update(id: number, branch: Partial<Branch>): Promise<Branch> {
+    return this.branchRepository.update(id, branch);
+  }
+
+  async delete(id: number): Promise<void> {
+    return this.branchRepository.delete(id);
+  }
 }
