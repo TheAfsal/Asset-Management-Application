@@ -1,47 +1,65 @@
-import { useState, useMemo } from "react";
-import { useFormContext } from "react-hook-form";
+import React from "react";
+import { useFormContext, Controller } from "react-hook-form";
+import { Autocomplete, TextField, FormHelperText, Box } from "@mui/material";
 
 interface AutoCompleteSelectProps {
   name: string;
+  label?: string;
   options: { value: number; label: string }[];
+  error?: boolean;
+  helperText?: string;
 }
 
 const AutoCompleteSelect: React.FC<AutoCompleteSelectProps> = ({
   name,
+  label,
   options,
+  error,
+  helperText,
 }) => {
-  const { register } = useFormContext();
-  const [search, setSearch] = useState("");
-
-  const filteredOptions = useMemo(() => {
-    const query = search.toLowerCase();
-    return options.filter((opt) =>
-      opt.label.toLowerCase().includes(query)
-    );
-  }, [search, options]);
+  const { control } = useFormContext();
 
   return (
-    <div>
-      <input
-        type="text"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-full p-2 border rounded mb-1"
-        placeholder="Search..."
-        aria-label={`Search ${name}`}
+    <Box>
+      <Controller
+        name={name}
+        control={control}
+        rules={{ required: true }}
+        render={({ field: { onChange, value }, fieldState }) => (
+          <>
+            <Autocomplete
+              options={options}
+              getOptionLabel={(option) =>
+                typeof option === "string" ? option : option.label
+              }
+              isOptionEqualToValue={(option, val) => option.value === val}
+              value={options.find((opt) => opt.value === value) || null}
+              onChange={(_, selected) => {
+                onChange(selected ? selected.value : null);
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label={label}
+                  size="small"
+                  size="medium"
+                  sx={{ minWidth: "300px" }}
+                  error={!!fieldState.error || error}
+                  helperText={fieldState.error?.message || helperText || ""}
+                />
+              )}
+              fullWidth
+              disableClearable
+            />
+            {(helperText || fieldState.error) && (
+              <FormHelperText error={!!fieldState.error || error}>
+                {fieldState.error?.message || helperText}
+              </FormHelperText>
+            )}
+          </>
+        )}
       />
-      <select
-        {...register(name, { valueAsNumber: true })}
-        className="w-full p-2 border rounded"
-      >
-        <option value="">Select...</option>
-        {filteredOptions.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-    </div>
+    </Box>
   );
 };
 

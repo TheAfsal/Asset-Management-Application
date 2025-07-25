@@ -1,6 +1,24 @@
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Typography,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  TextField,
+  IconButton,
+  Card,
+} from "@mui/material";
+import { Add, Delete } from "@mui/icons-material";
+import { motion, AnimatePresence } from "framer-motion";
 import { useFormContext, useWatch } from "react-hook-form";
+import ExcelJS from "exceljs";
 import AutoCompleteSelect from "../common/AutoCompleteSelect";
-import { useState, useEffect } from "react";
 import type { AssetSubcategory } from "../../types";
 
 interface LineItemTableProps {
@@ -24,166 +42,244 @@ const LineItemTable: React.FC<LineItemTableProps> = ({ subcategories }) => {
     }) || [];
 
   useEffect(() => {
-  lineItems.forEach((item: any, index: number) => {
-    const quantity = item?.quantity || 0;
-    const unit_price = item?.unit_price || 0;
-    const tax_percent = item?.tax_percent || 0;
+    lineItems.forEach((item: any, index: number) => {
+      const quantity = item?.quantity || 0;
+      const unit_price = item?.unit_price || 0;
+      const tax_percent = item?.tax_percent || 0;
 
-    const taxable_value = Number((quantity * unit_price).toFixed(2));
-    const total_amount = Number((taxable_value * (1 + tax_percent / 100)).toFixed(2));
+      const taxable_value = Number((quantity * unit_price).toFixed(2));
+      const total_amount = Number(
+        (taxable_value * (1 + tax_percent / 100)).toFixed(2)
+      );
 
-    // Only update if value actually changed to prevent infinite loop
-    if (item.taxable_value !== taxable_value) {
-      setValue(`lineItems[${index}].taxable_value`, taxable_value);
-    }
-    if (item.total_amount !== total_amount) {
-      setValue(`lineItems[${index}].total_amount`, total_amount);
-    }
-  });
-}, [lineItems, setValue]);
-
+      if (item.taxable_value !== taxable_value) {
+        setValue(`lineItems[${index}].taxable_value`, taxable_value);
+      }
+      if (item.total_amount !== total_amount) {
+        setValue(`lineItems[${index}].total_amount`, total_amount);
+      }
+    });
+  }, [lineItems, setValue]);
 
   const addRow = () => {
-    setRows([...rows, { id: Date.now() }]);
+    setRows([...rows, { id: Date.now() + Math.random() }]);
   };
 
   const removeRow = (id: number) => {
     const indexToRemove = rows.findIndex((row) => row.id === id);
     setRows(rows.filter((row) => row.id !== id));
-
     const updatedItems = lineItems.filter((_, i) => i !== indexToRemove);
     setValue("lineItems", updatedItems);
   };
 
+  const handleExcelUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const workbook = new ExcelJS.Workbook();
+    const buffer = await file.arrayBuffer();
+    await workbook.xlsx.load(buffer);
+
+    const worksheet = workbook.worksheets[0];
+    const rowsData: any[] = [];
+
+    worksheet.eachRow((row, rowIndex) => {
+      if (rowIndex === 1) return;
+
+      const [
+        subcategory_id,
+        item_description,
+        quantity,
+        unit_price,
+        tax_percent,
+      ] = row.values.slice(1); 
+
+      const qty = Number(quantity) || 0;
+      const price = Number(unit_price) || 0;
+      const tax = Number(tax_percent) || 0;
+      const taxable_value = Number((qty * price).toFixed(2));
+      const total_amount = Number(
+        (taxable_value * (1 + tax / 100)).toFixed(2)
+      );
+
+      rowsData.push({
+        subcategory_id,
+        item_description: item_description || "",
+        quantity: qty,
+        unit_price: price,
+        tax_percent: tax,
+        taxable_value,
+        total_amount,
+      });
+    });
+
+    setValue("lineItems", rowsData);
+    setRows(rowsData.map(() => ({ id: Date.now() + Math.random() })));
+    e.target.value = ""; // Reset file input
+  };
+
   return (
-    <div className="overflow-x-auto">
-      <div className="flex justify-between mb-2">
-        <button
-          type="button"
-          onClick={addRow}
-          className="px-4 py-2 bg-green-500 text-white rounded"
-          aria-label="Add Row"
-        >
-          Add Row
-        </button>
-      </div>
-      <table className="w-full border-collapse">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="p-2 text-left">#</th>
-            <th className="p-2 text-left">Sub-Category</th>
-            <th className="p-2 text-left">Item Description</th>
-            <th className="p-2 text-left">Qty</th>
-            <th className="p-2 text-left">Unit Price</th>
-            <th className="p-2 text-left">Tax %</th>
-            <th className="p-2 text-left">Taxable Value</th>
-            <th className="p-2 text-left">Total Amount</th>
-            <th className="p-2 text-left">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, index) => (
-            <tr key={row.id}>
-              <td className="p-2">{index + 1}</td>
-              <td className="p-2">
-                <AutoCompleteSelect
-                  name={`lineItems[${index}].subcategory_id`}
-                  options={subcategories.map((s) => ({
-                    value: s.id,
-                    label: s.name,
-                  }))}
-                />
-                {errors.lineItems?.[index]?.subcategory_id && (
-                  <p className="text-red-500 text-sm">
-                    {errors.lineItems[index].subcategory_id.message}
-                  </p>
-                )}
-              </td>
-              <td className="p-2">
-                <input
-                  {...register(`lineItems[${index}].item_description`)}
-                  className="w-full p-2 border rounded"
-                  maxLength={100}
-                />
-                {errors.lineItems?.[index]?.item_description && (
-                  <p className="text-red-500 text-sm">
-                    {errors.lineItems[index].item_description.message}
-                  </p>
-                )}
-              </td>
-              <td className="p-2">
-                <input
-                  type="number"
-                  {...register(`lineItems[${index}].quantity`, {
-                    valueAsNumber: true,
-                  })}
-                  className="w-full p-2 border rounded"
-                />
-                {errors.lineItems?.[index]?.quantity && (
-                  <p className="text-red-500 text-sm">
-                    {errors.lineItems[index].quantity.message}
-                  </p>
-                )}
-              </td>
-              <td className="p-2">
-                <input
-                  type="number"
-                  {...register(`lineItems[${index}].unit_price`, {
-                    valueAsNumber: true,
-                  })}
-                  className="w-full p-2 border rounded"
-                />
-                {errors.lineItems?.[index]?.unit_price && (
-                  <p className="text-red-500 text-sm">
-                    {errors.lineItems[index].unit_price.message}
-                  </p>
-                )}
-              </td>
-              <td className="p-2">
-                <input
-                  type="number"
-                  {...register(`lineItems[${index}].tax_percent`, {
-                    valueAsNumber: true,
-                  })}
-                  className="w-full p-2 border rounded"
-                />
-                {errors.lineItems?.[index]?.tax_percent && (
-                  <p className="text-red-500 text-sm">
-                    {errors.lineItems[index].tax_percent.message}
-                  </p>
-                )}
-              </td>
-              <td className="p-2">
-                <input
-                  {...register(`lineItems[${index}].taxable_value`)}
-                  readOnly
-                  className="w-full p-2 border rounded bg-gray-100"
-                  aria-readonly
-                />
-              </td>
-              <td className="p-2">
-                <input
-                  {...register(`lineItems[${index}].total_amount`)}
-                  readOnly
-                  className="w-full p-2 border rounded bg-gray-100"
-                  aria-readonly
-                />
-              </td>
-              <td className="p-2">
-                <button
-                  type="button"
-                  onClick={() => removeRow(row.id)}
-                  className="text-red-500"
-                  aria-label="Delete Row"
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <Box className="mb-6 flex justify-between items-center">
+        <Typography variant="h6" className="font-semibold text-gray-800">
+          Line Items
+        </Typography>
+        <Box className="flex items-center gap-3">
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={addRow}
+              className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+            >
+              Add Item
+            </Button>
+          </motion.div>
+
+          <Button variant="outlined" component="label">
+            Upload Excel
+            <input
+              type="file"
+              accept=".xlsx"
+              hidden
+              onChange={handleExcelUpload}
+            />
+          </Button>
+        </Box>
+      </Box>
+
+      <Card className="luxury-card border-0">
+        <TableContainer component={Paper} className="border-0">
+          <Table>
+            <TableHead>
+              <TableRow className="bg-gradient-to-r from-gray-50 to-gray-100">
+                <TableCell>#</TableCell>
+                <TableCell>Sub-Category</TableCell>
+                <TableCell>Description</TableCell>
+                <TableCell>Qty</TableCell>
+                <TableCell>Unit Price</TableCell>
+                <TableCell>Tax %</TableCell>
+                <TableCell>Taxable Value</TableCell>
+                <TableCell>Total Amount</TableCell>
+                <TableCell>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              <AnimatePresence>
+                {rows.map((row, index) => (
+                  <motion.tr
+                    key={row.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ delay: index * 0.05 }}
+                    component={TableRow}
+                    className="hover:bg-gray-50"
+                  >
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell>
+                      <AutoCompleteSelect
+                        name={`lineItems[${index}].subcategory_id`}
+                        options={subcategories.map((s) => ({
+                          value: s.id,
+                          label: s.name,
+                        }))}
+                        error={!!errors.lineItems?.[index]?.subcategory_id}
+                        helperText={
+                          errors.lineItems?.[index]?.subcategory_id?.message
+                        }
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        {...register(`lineItems[${index}].item_description`)}
+                        size="small"
+                        inputProps={{ maxLength: 100 }}
+                        error={!!errors.lineItems?.[index]?.item_description}
+                        helperText={
+                          errors.lineItems?.[index]?.item_description?.message
+                        }
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        {...register(`lineItems[${index}].quantity`, {
+                          valueAsNumber: true,
+                        })}
+                        type="number"
+                        size="small"
+                        error={!!errors.lineItems?.[index]?.quantity}
+                        helperText={
+                          errors.lineItems?.[index]?.quantity?.message
+                        }
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        {...register(`lineItems[${index}].unit_price`, {
+                          valueAsNumber: true,
+                        })}
+                        type="number"
+                        size="small"
+                        error={!!errors.lineItems?.[index]?.unit_price}
+                        helperText={
+                          errors.lineItems?.[index]?.unit_price?.message
+                        }
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        {...register(`lineItems[${index}].tax_percent`, {
+                          valueAsNumber: true,
+                        })}
+                        type="number"
+                        size="small"
+                        error={!!errors.lineItems?.[index]?.tax_percent}
+                        helperText={
+                          errors.lineItems?.[index]?.tax_percent?.message
+                        }
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        {...register(`lineItems[${index}].taxable_value`)}
+                        size="small"
+                        InputProps={{ readOnly: true }}
+                        className="bg-gray-50"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        {...register(`lineItems[${index}].total_amount`)}
+                        size="small"
+                        InputProps={{ readOnly: true }}
+                        className="bg-gray-50"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <motion.div
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                      >
+                        <IconButton
+                          onClick={() => removeRow(row.id)}
+                          className="text-red-600 hover:bg-red-50"
+                          size="small"
+                        >
+                          <Delete fontSize="small" />
+                        </IconButton>
+                      </motion.div>
+                    </TableCell>
+                  </motion.tr>
+                ))}
+              </AnimatePresence>
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Card>
+    </motion.div>
   );
 };
 
