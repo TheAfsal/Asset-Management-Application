@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useReports } from '../../hooks/useReports';
-import type { Grn, Vendor, Branch } from '../../types';
+import type { Grn } from '../../types';
 import { exportToExcel } from '../../utils/excelUtils';
 
 interface GrnRegisterReportProps {
